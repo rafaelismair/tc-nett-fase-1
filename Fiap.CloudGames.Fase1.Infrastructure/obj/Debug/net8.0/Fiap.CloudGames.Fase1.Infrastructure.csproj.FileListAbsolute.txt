@@ -1,5 +1,0 @@
-C:\fiap\tc-nett-fase-1\Fiap.CloudGames.Fase1\Fiap.CloudGames.Fase1.Infrastructure\obj\Debug\net8.0\Fiap.CloudGames.Fase1.Infrastructure.csproj.AssemblyReference.cache
-C:\fiap\tc-nett-fase-1\Fiap.CloudGames.Fase1\Fiap.CloudGames.Fase1.Infrastructure\obj\Debug\net8.0\Fiap.CloudGames.Fase1.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
-C:\fiap\tc-nett-fase-1\Fiap.CloudGames.Fase1\Fiap.CloudGames.Fase1.Infrastructure\obj\Debug\net8.0\Fiap.CloudGames.Fase1.Infrastructure.AssemblyInfoInputs.cache
-C:\fiap\tc-nett-fase-1\Fiap.CloudGames.Fase1\Fiap.CloudGames.Fase1.Infrastructure\obj\Debug\net8.0\Fiap.CloudGames.Fase1.Infrastructure.AssemblyInfo.cs
-C:\fiap\tc-nett-fase-1\Fiap.CloudGames.Fase1\Fiap.CloudGames.Fase1.Infrastructure\obj\Debug\net8.0\Fiap.CloudGames.Fase1.Infrastructure.csproj.CoreCompileInputs.cache

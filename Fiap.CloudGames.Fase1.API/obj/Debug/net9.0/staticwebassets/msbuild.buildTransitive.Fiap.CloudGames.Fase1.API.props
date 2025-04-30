@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\Fiap.CloudGames.Fase1.API.props" />
-</Project>
