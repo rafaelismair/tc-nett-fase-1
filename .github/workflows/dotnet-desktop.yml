@@ -26,4 +26,4 @@ jobs:
       run: dotnet build Fiap.CloudGames.Fase1.sln --configuration Release --no-restore
 
     - name: 🧪 Executar testes
-      run: dotnet test Fiap.CloudGames.Fase1.sln --no-build --verbosity normal
+      run: dotnet test Fiap.CloudGames.Fase1.Tests/Fiap.CloudGames.Fase1.Tests.csproj --no-build --verbosity normal
