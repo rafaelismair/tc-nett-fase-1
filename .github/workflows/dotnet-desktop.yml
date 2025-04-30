@@ -1,4 +1,4 @@
-name: CI - Build & Test .NET 8
+name: CI - Build & Test .NET 9
 
 on:
   push:
@@ -7,23 +7,28 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
     - name: 📥 Checkout do código
       uses: actions/checkout@v3
 
-    - name: 🧰 Instalar .NET 9
+    - name: 🧰 Instalar .NET 9 Preview
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '9.0.x'
 
+    - name: 🧾 Verificar versão instalada
+      run: dotnet --info
+
     - name: 🔁 Restaurar pacotes
       run: dotnet restore Fiap.CloudGames.Fase1.sln
 
-    - name: 🛠️ Compilar solução
+    - name: 🛠️ Build do projeto
       run: dotnet build Fiap.CloudGames.Fase1.sln --configuration Release --no-restore
 
-    - name: 🧪 Executar testes
-      run: dotnet test Fiap.CloudGames.Fase1.Tests/Fiap.CloudGames.Fase1.Tests.csproj --no-build --verbosity normal
+    - name: 🧪 Executar testes (modo seguro)
+      run: |
+        dotnet build Fiap.CloudGames.Fase1.Tests/Fiap.CloudGames.Fase1.Tests.csproj --configuration Release
+        dotnet test Fiap.CloudGames.Fase1.Tests/Fiap.CloudGames.Fase1.Tests.csproj --no-build --no-restore --verbosity normal
