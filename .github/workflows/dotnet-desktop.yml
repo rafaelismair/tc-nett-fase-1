@@ -28,7 +28,10 @@ jobs:
     - name: 🛠️ Build do projeto
       run: dotnet build Fiap.CloudGames.Fase1.sln --configuration Release --no-restore
 
-    - name: 🧪 Executar testes (modo seguro)
+    - name: 🧪 Executar testes (Release)
       run: |
-        dotnet build Fiap.CloudGames.Fase1.Tests/Fiap.CloudGames.Fase1.Tests.csproj --configuration Release
-        dotnet test Fiap.CloudGames.Fase1.Tests/Fiap.CloudGames.Fase1.Tests.csproj --no-build --no-restore --verbosity normal
+        dotnet test Fiap.CloudGames.Fase1.Tests/Fiap.CloudGames.Fase1.Tests.csproj \
+          --configuration Release \
+          --no-restore \
+          --no-build \
+          --verbosity normal
