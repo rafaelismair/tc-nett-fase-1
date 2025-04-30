@@ -6,7 +6,7 @@ Este projeto é o MVP da plataforma **FIAP Cloud Games**, desenvolvido como part
 
 ## 🛠 Tecnologias
 
-- .NET 8
+- .NET 9
 - Entity Framework Core
 - PostgreSQL
 - JWT Authentication
