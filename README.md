@@ -1,31 +1,33 @@
 # 🎮 FIAP Cloud Games - Tech Challenge Fase 1
 
-Este projeto é o MVP da plataforma **FIAP Cloud Games**, desenvolvido como parte do Tech Challenge FIAP. Ele permite o **cadastro de usuários**, **login com autenticação JWT**, **gerenciamento de jogos** e a **biblioteca de jogos adquiridos**.
+![Build Status](https://github.com/rafaelismair/tc-nett-fase-1/actions/workflows/dotnet-desktop.yml/badge.svg)
+
+Este projeto é o MVP da plataforma **FIAP Cloud Games**, desenvolvido como parte do Tech Challenge da FIAP. Ele permite o **cadastro de usuários**, **login com autenticação JWT**, **gerenciamento de jogos** e uma **biblioteca de jogos adquiridos** por usuário.
 
 ---
 
 ## 🛠 Tecnologias
 
-- .NET 9
+- .NET **9 (Preview)**
 - Entity Framework Core
 - PostgreSQL
 - JWT Authentication
+- Swagger (Swashbuckle)
 - xUnit + Moq
-- Swagger
 - Clean Architecture + DDD
 
 ---
 
 ## 📦 Instalação
 
-### Requisitos
+### ✅ Requisitos
 
-- .NET 8 SDK
-- PostgreSQL instalado (pode ser Docker)
+- .NET **9 SDK** (Preview)
+- PostgreSQL (local ou via Docker)
 - Visual Studio 2022+ ou VS Code
 
-### Clonando o projeto
+### 🚀 Clonando o projeto
 
 ```bash
-git clone https://github.com/seuusuario/fiap-cloud-games.git
-cd fiap-cloud-games
+git clone https://github.com/rafaelismair/tc-nett-fase-1.git
+cd tc-nett-fase-1
