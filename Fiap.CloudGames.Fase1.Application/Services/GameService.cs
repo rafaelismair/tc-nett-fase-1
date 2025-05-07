@@ -2,16 +2,19 @@
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Domain.Entities;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fiap.CloudGames.Fase1.Application.Services;
 public class GameService : IGameService
 {
     private readonly ApplicationDbContext _context;
+    private readonly ILogService<GameService> _logger;
 
-    public GameService(ApplicationDbContext context)
+    public GameService(ApplicationDbContext context, ILogService<GameService> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     public async Task<Game> CreateAsync(CreateGameDto dto)
@@ -39,7 +42,10 @@ public class GameService : IGameService
     {
         var exists = await _context.UserGames.AnyAsync(x => x.UserId == userId && x.GameId == gameId);
         if (exists)
+        {
+            _logger.LogInformation("Jogo já adquirido.");
             throw new Exception("Jogo já adquirido.");
+        }
 
         _context.UserGames.Add(new UserGame
         {

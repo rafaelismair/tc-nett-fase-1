@@ -1,11 +1,15 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.OpenApi.Models;
-using Fiap.CloudGames.Fase1.Infrastructure.Data;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using Fiap.CloudGames.Fase1.API.Middleware;
+using Fiap.CloudGames.Fase1.API.Middleware.Logging;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Application.Services;
+using Fiap.CloudGames.Fase1.Infrastructure.Data;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,6 +33,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCorrelationIdGenerator();
+builder.Services.AddTransient(typeof(ILogService<>), typeof(LogService<>));
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IGameService, GameService>();
 
@@ -51,5 +58,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+#region Middlewares
+app.UseCorrelationIdMiddleware();
+#endregion
 
 app.Run();

@@ -1,6 +1,9 @@
-﻿using Fiap.CloudGames.Fase1.Application.DTOs;
+﻿using Fiap.CloudGames.Fase1.API.Middleware.Logging;
+using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 
@@ -9,9 +12,12 @@ namespace Fiap.CloudGames.Fase1.API.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-    public AuthController(IAuthService authService)
+    private readonly ILogService<AuthController> _logger;
+
+    public AuthController(IAuthService authService, ILogService<AuthController> logger)
     {
         _authService = authService;
+        _logger = logger;
     }
 
     [HttpPost("register")]
