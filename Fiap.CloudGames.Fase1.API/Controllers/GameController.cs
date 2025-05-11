@@ -1,5 +1,7 @@
 ﻿using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
+using Fiap.CloudGames.Fase1.Domain.Entities;
+using Fiap.CloudGames.Fase1.Infrastructure.Helpers;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +35,8 @@ public class GameController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var games = await _gameService.GetAllAsync();
-        return Ok(games);
+        //return Ok(games);
+        return ReturnHandlerHelper.ProcessResult(true, string.Empty, string.Empty, games);
     }
 
     [HttpPost("{gameId}/acquire")]

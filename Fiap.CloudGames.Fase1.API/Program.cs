@@ -5,6 +5,7 @@ using Fiap.CloudGames.Fase1.Application.Services;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Services;
+using Fiap.CloudGames.Fase1.Infrastructure.Middleware.CustomException;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -42,7 +43,11 @@ builder.Services.AddScoped<IGameService, GameService>();
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(config =>
+{
+    config.Filters.Add(typeof(CustomExceptionMiddleware));
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
 {
