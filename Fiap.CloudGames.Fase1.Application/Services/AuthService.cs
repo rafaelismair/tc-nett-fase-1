@@ -3,6 +3,7 @@ using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Domain.Entities;
 using Fiap.CloudGames.Fase1.Domain.Enums;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -15,17 +16,23 @@ public class AuthService : IAuthService
 {
     private readonly ApplicationDbContext _context;
     private readonly IConfiguration _config;
+    private readonly ILogService<AuthService> _logger;
 
-    public AuthService(ApplicationDbContext context, IConfiguration config)
+    public AuthService(ApplicationDbContext context, IConfiguration config,
+        ILogService<AuthService> logger)
     {
         _context = context;
         _config = config;
+        _logger = logger;
     }
 
     public async Task<string> RegisterAsync(RegisterUserDto dto, bool isAdmin = false)
     {
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
+        {
+            _logger.LogInformation($"E-mail {dto.Email} já cadastrado.");
             throw new Exception("E-mail já cadastrado.");
+        }
 
         var user = new User
         {
@@ -46,7 +53,10 @@ public class AuthService : IAuthService
     {
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
+        {
+            _logger.LogInformation("Usuário ou senha inválidos.");
             throw new Exception("Usuário ou senha inválidos.");
+        }
 
         return GenerateJwt(user);
     }

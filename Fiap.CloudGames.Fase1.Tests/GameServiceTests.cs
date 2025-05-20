@@ -2,6 +2,7 @@
 using Fiap.CloudGames.Fase1.Application.Services;
 using Fiap.CloudGames.Fase1.Domain.Entities;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace Fiap.CloudGames.Fase1.Tests;
@@ -10,15 +11,17 @@ public class GameServiceTests
 {
     private readonly ApplicationDbContext _context;
     private readonly GameService _service;
+    private readonly LogService<GameService> _logger;
 
     public GameServiceTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase("GameTestDb")
             .Options;
-
+            
+        _logger = new LogService<GameService>();
         _context = new ApplicationDbContext(options);
-        _service = new GameService(_context);
+        _service = new GameService(_context, _logger);
     }
 
     [Fact]

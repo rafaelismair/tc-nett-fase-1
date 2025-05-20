@@ -3,6 +3,7 @@ using Fiap.CloudGames.Fase1.Application.Services;
 using Fiap.CloudGames.Fase1.Domain.Entities;
 using Fiap.CloudGames.Fase1.Domain.Enums;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 
@@ -12,6 +13,7 @@ public class AuthServiceTests
 {
     private readonly ApplicationDbContext _context;
     private readonly AuthService _service;
+    private readonly LogService<AuthService> _logger;
 
     public AuthServiceTests()
     {
@@ -21,6 +23,8 @@ public class AuthServiceTests
 
         _context = new ApplicationDbContext(options);
 
+        _logger = new LogService<AuthService>();
+
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
@@ -29,7 +33,7 @@ public class AuthServiceTests
             })
             .Build();
 
-        _service = new AuthService(_context, config);
+        _service = new AuthService(_context, config, _logger);
     }
 
     [Fact]

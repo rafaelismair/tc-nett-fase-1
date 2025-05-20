@@ -1,6 +1,6 @@
 ﻿using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
-using Fiap.CloudGames.Fase1.Domain.Entities;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -12,10 +12,12 @@ namespace Fiap.CloudGames.Fase1.API.Controllers;
 public class GameController : ControllerBase
 {
     private readonly IGameService _gameService;
+    private readonly ILogService<GameController> _logger;
 
-    public GameController(IGameService gameService)
+    public GameController(IGameService gameService, ILogService<GameController> logger)
     {
         _gameService = gameService;
+        _logger = logger;
     }
 
     [HttpPost]
