@@ -1,11 +1,11 @@
 using Fiap.CloudGames.Fase1.API.Middleware;
+using Fiap.CloudGames.Fase1.API.Middleware.ErrorHandling;
 using Fiap.CloudGames.Fase1.API.Middleware.Logging;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Application.Services;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Services;
-using Fiap.CloudGames.Fase1.Infrastructure.Middleware.CustomException;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -43,11 +43,7 @@ builder.Services.AddScoped<IGameService, GameService>();
 
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers(config =>
-{
-    config.Filters.Add(typeof(CustomExceptionMiddleware));
-});
-
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
 {
@@ -66,6 +62,7 @@ app.MapControllers();
 
 #region Middlewares
 app.UseCorrelationIdMiddleware();
+app.UseErrorHandlingMiddleware();
 #endregion
 
 app.Run();
