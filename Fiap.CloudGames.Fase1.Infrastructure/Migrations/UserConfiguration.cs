@@ -3,7 +3,7 @@ using Fiap.CloudGames.Fase1.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Fiap.CloudGames.Fase1.Infrastructure.Mappings;
+namespace Fiap.CloudGames.Fase1.Infrastructure.Migrations;
 public class UserConfiguration : IEntityTypeConfiguration<User>
 {
     public void Configure(EntityTypeBuilder<User> builder)
