@@ -29,7 +29,7 @@ public class GameController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll()
     {
         var games = await _gameService.GetAllAsync();
