@@ -9,6 +9,9 @@ namespace Fiap.CloudGames.Fase1.API.Controllers;
 
 [ApiController]
 [Route("games")]
+[Produces("application/json")]
+[Consumes("application/json")]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 public class GameController : ControllerBase
 {
     private readonly IGameService _gameService;
@@ -20,6 +23,8 @@ public class GameController : ControllerBase
         _logger = logger;
     }
 
+    /// <summary> Adiciona um jogo ao catálogo </summary>
+    /// <remarks>Requer permissão de Admin</remarks>
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateGameDto dto)
@@ -28,6 +33,7 @@ public class GameController : ControllerBase
         return Ok(game);
     }
 
+    /// <summary> Listagem dos jogos </summary>
     [HttpGet]
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll()
@@ -36,6 +42,7 @@ public class GameController : ControllerBase
         return Ok(games);
     }
 
+    /// <summary> Aquisição de um jogo do catálogo </summary>
     [HttpPost("{gameId}/acquire")]
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> Acquire(Guid gameId)
@@ -45,6 +52,7 @@ public class GameController : ControllerBase
         return NoContent();
     }
 
+    /// <summary> Biblioteca de jogos adquiridos </summary>
     [HttpGet("my-library")]
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetMyGames()
