@@ -22,7 +22,6 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
-    [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
         var token = await _authService.RegisterAsync(dto);
