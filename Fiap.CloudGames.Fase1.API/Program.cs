@@ -8,6 +8,7 @@ using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
@@ -73,6 +74,7 @@ builder.Services.AddSwaggerGen(opt =>
             Array.Empty<string>()
         }
     });
+    opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Fiap.CloudGames.Fase1.API.xml"));
 });
 
 
