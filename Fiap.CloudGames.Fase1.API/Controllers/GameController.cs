@@ -1,4 +1,5 @@
-﻿using Fiap.CloudGames.Fase1.Application.DTOs;
+﻿using Fiap.CloudGames.Fase1.API.Controllers.Base;
+using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -9,12 +10,12 @@ namespace Fiap.CloudGames.Fase1.API.Controllers;
 
 [ApiController]
 [Route("games")]
-public class GameController : ControllerBase
+public class GameController : CustomControllerBase<GameController>
 {
     private readonly IGameService _gameService;
     private readonly ILogService<GameController> _logger;
 
-    public GameController(IGameService gameService, ILogService<GameController> logger)
+    public GameController(IGameService gameService, ILogService<GameController> logger) : base(logger)
     {
         _gameService = gameService;
         _logger = logger;
@@ -32,8 +33,15 @@ public class GameController : ControllerBase
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll()
     {
-        var games = await _gameService.GetAllAsync();
-        return Ok(games);
+        try
+        {
+            var games = await _gameService.GetAllAsync();
+            return HandleResult(games);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex);
+        }
     }
 
     [HttpPost("{gameId}/acquire")]
