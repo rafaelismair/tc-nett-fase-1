@@ -76,3 +76,18 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 .DS_Store
+
+# ---------------------------------------------
+# 🐳 Docker e Docker Compose
+# ---------------------------------------------
+docker-compose.override.yml
+docker-compose.*.yml
+Dockerfile*
+.dockerignore
+*.env
+.env.*
+volumes/
+tmp/
+*.pid
+*.tar
+
