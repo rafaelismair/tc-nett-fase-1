@@ -1,3 +1,4 @@
+using Fiap.CloudGames.Fase1.API.Controllers.Base;
 using Fiap.CloudGames.Fase1.API.Middleware.Logging;
 using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
@@ -13,12 +14,12 @@ namespace Fiap.CloudGames.Fase1.API.Controllers;
 [Produces("application/json")]
 [Consumes("application/json")]
 [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-public class AuthController : ControllerBase
+public class AuthController : CustomControllerBase<AuthController>
 {
     private readonly IAuthService _authService;
     private readonly ILogService<AuthController> _logger;
 
-    public AuthController(IAuthService authService, ILogService<AuthController> logger)
+    public AuthController(IAuthService authService, ILogService<AuthController> logger) : base(logger)
     {
         _authService = authService;
         _logger = logger;
@@ -26,7 +27,6 @@ public class AuthController : ControllerBase
 
     /// <summary> Registro de um usuário </summary>
     [HttpPost("register")]
-    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {

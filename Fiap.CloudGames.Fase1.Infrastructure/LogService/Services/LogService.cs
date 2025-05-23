@@ -31,5 +31,12 @@ namespace Fiap.CloudGames.Fase1.Infrastructure.LogService.Services
         {
             _logger.LogError($"[CorrelationId: {_correlationId.Get()}] {message}");
         }
+        
+        public virtual void LogError(Exception ex)
+        {
+            _logger.LogError($"[CorrelationId: {_correlationId.Get()}] {ex.Message} {Environment.NewLine} | {ex.StackTrace} |");
+        }
+
+
     }
 }

@@ -1,4 +1,5 @@
 using Fiap.CloudGames.Fase1.API.Middleware;
+using Fiap.CloudGames.Fase1.API.Middleware.ErrorHandling;
 using Fiap.CloudGames.Fase1.API.Middleware.Logging;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Application.Services;
@@ -89,6 +90,7 @@ app.MapControllers();
 
 #region Middlewares
 app.UseCorrelationIdMiddleware();
+app.UseErrorHandlingMiddleware();
 #endregion
 
 app.Run();
