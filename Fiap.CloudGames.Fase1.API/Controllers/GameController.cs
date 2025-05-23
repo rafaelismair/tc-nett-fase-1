@@ -30,7 +30,7 @@ public class GameController : CustomControllerBase<GameController>
     }
 
     [HttpGet]
-    [AllowAnonymous]
+    [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll()
     {
         try
