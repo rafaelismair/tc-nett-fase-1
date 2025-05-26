@@ -65,4 +65,9 @@ public class GameService : IGameService
             .Select(x => x.Game)
             .ToListAsync();
     }
+
+    public async Task<Game> GetByIdAsync(Guid gameId)
+    {
+        return await _context.Games.FirstOrDefaultAsync(game => game.Id == gameId);
+    }
 }
