@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 
 [ApiController]
-[Route("games")]
+[Route("games/[action]")]
 [Produces("application/json")]
 [Consumes("application/json")]
 [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -44,6 +44,23 @@ public class GameController : CustomControllerBase<GameController>
         {
             var games = await _gameService.GetAllAsync();
             return HandleResult(games);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex);
+        }
+    }
+
+
+    /// <summary> Listar detalhes de um jogo específico </summary>
+    [HttpGet("{gameId}")]
+    [Authorize(Roles = "User,Admin")]
+    public async Task<IActionResult> GetById(Guid gameId)
+    {
+        try
+        {
+            var game = await _gameService.GetByIdAsync(gameId);
+            return HandleResult(game);
         }
         catch (Exception ex)
         {
