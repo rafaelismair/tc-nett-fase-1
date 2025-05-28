@@ -14,12 +14,20 @@ namespace Fiap.CloudGames.Fase1.API.Middleware.Logging
             _next = next;
         }
 
-        public Task Invoke(HttpContext httpContext, ICorrelationIdGenerator correlationIdGenerator)
+        public async Task Invoke(HttpContext httpContext, ICorrelationIdGenerator correlationIdGenerator)
         {
             var correlationId = GetCorrelationId(httpContext, correlationIdGenerator);
-            AddCorrelationIdHeaderToResponse(httpContext, correlationId);
+            var logContext = Serilog.Context.LogContext.PushProperty("CorrelationId", correlationId);
 
-            return _next(httpContext);
+            httpContext.Response.Headers[_correlationIdHeader] = new[] { correlationId.ToString() };
+            try
+            {
+                await _next(httpContext);
+            }
+            finally
+            {
+                logContext.Dispose();
+            }
         }
 
         private static StringValues GetCorrelationId(HttpContext context, ICorrelationIdGenerator correlationIdGenerator)
@@ -27,22 +35,16 @@ namespace Fiap.CloudGames.Fase1.API.Middleware.Logging
             if (context.Request.Headers.TryGetValue(_correlationIdHeader, out var correlationId))
             {
                 correlationIdGenerator.Set(correlationId);
-                return correlationId;
             }
             else
             {
                 correlationId = Guid.NewGuid().ToString();
                 correlationIdGenerator.Set(correlationId);
-                return correlationId;
             }
-        }
+            context.Items["CorrelationId"] = correlationId;
 
-        private static void AddCorrelationIdHeaderToResponse(HttpContext context, StringValues correlationId)
-       => context.Response.OnStarting(() =>
-       {
-           context.Response.Headers[_correlationIdHeader] = new[] { correlationId.ToString() };
-           return Task.CompletedTask;
-       });
+            return correlationId;
+        }
     }
 
     // Extension method used to add the middleware to the HTTP request pipeline.

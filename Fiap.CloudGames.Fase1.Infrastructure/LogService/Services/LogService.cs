@@ -19,22 +19,22 @@ namespace Fiap.CloudGames.Fase1.Infrastructure.LogService.Services
 
         public virtual void LogInformation(string message)
         {
-            _logger.LogInformation($"[CorrelationId: {_correlationId.Get()}] {message}");
+            _logger.LogInformation(message);
         }
 
         public virtual void LogWarning(string message)
         {
-            _logger.LogWarning($"[CorrelationId: {_correlationId.Get()}] {message}");
+            _logger.LogWarning(message);
         }
 
         public virtual void LogError(string message)
         {
-            _logger.LogError($"[CorrelationId: {_correlationId.Get()}] {message}");
+            _logger.LogError(message);
         }
         
         public virtual void LogError(Exception ex)
         {
-            _logger.LogError($"[CorrelationId: {_correlationId.Get()}] {ex.Message} {Environment.NewLine} | {ex.StackTrace} |");
+            _logger.LogError($"{ex.Message} {Environment.NewLine} | {ex.StackTrace} |");
         }
 
 
