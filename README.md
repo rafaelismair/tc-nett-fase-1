@@ -8,7 +8,7 @@ Este projeto é o MVP da plataforma **FIAP Cloud Games**, desenvolvido como part
 
 ## 🛠 Tecnologias
 
-- .NET **9 (Preview)**
+- .NET **8**
 - Entity Framework Core
 - PostgreSQL
 - JWT Authentication
@@ -22,8 +22,8 @@ Este projeto é o MVP da plataforma **FIAP Cloud Games**, desenvolvido como part
 
 ### ✅ Requisitos
 
-- .NET **9 SDK** (Preview)
-- PostgreSQL (local ou via Docker)
+- .NET **8** (Preview)
+- PostgreSQL (https://railway.com/)
 - Visual Studio 2022+ ou VS Code
 
 ### 🚀 Clonando o projeto

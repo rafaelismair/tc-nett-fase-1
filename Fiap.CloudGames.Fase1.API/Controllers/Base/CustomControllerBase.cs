@@ -12,7 +12,7 @@ namespace Fiap.CloudGames.Fase1.API.Controllers.Base
             _baseLogger = baseLogger;
         }
 
-        protected virtual IActionResult HandleResult<T>(T result, string notFoundMessage = "Resource not found.")
+        protected virtual IActionResult HandleResult<T>(T result, string notFoundMessage = "Recurso não encontrado.")
         {
             if (result == null)
                 return NotFound(notFoundMessage);
@@ -20,21 +20,21 @@ namespace Fiap.CloudGames.Fase1.API.Controllers.Base
             return Ok(result);
         }
 
-        protected virtual IActionResult HandleBadRequest(string exceptionMessage, string errorMessage = "The request could no be processed.")
+        protected virtual IActionResult HandleBadRequest(string exceptionMessage, string errorMessage = "A requisição não pôde ser executada.")
         {
             _baseLogger.LogError(exceptionMessage);
 
             return BadRequest(new { error = errorMessage });
         }
 
-        protected virtual IActionResult HandleBadRequest(Exception ex, string errorMessage = "The request could no be processed.")
+        protected virtual IActionResult HandleBadRequest(Exception ex, string errorMessage = "A requisição não pôde ser processada.")
         {
             _baseLogger.LogError(ex);
 
             return BadRequest(new { error = errorMessage });
         }
 
-        protected virtual IActionResult HandleException(Exception ex, string message = "An unexpected error occurred.")
+        protected virtual IActionResult HandleException(Exception ex, string message = "Ocorreu um erro inesperado.")
         {
             _baseLogger.LogError(ex);
 
