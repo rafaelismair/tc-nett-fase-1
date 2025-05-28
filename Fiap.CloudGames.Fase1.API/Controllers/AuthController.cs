@@ -11,6 +11,9 @@ namespace Fiap.CloudGames.Fase1.API.Controllers;
 
 [ApiController]
 [Route("auth")]
+[Produces("application/json")]
+[Consumes("application/json")]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
 public class AuthController : CustomControllerBase<AuthController>
 {
     private readonly IAuthService _authService;
@@ -22,22 +25,29 @@ public class AuthController : CustomControllerBase<AuthController>
         _logger = logger;
     }
 
+    /// <summary> Registro de um usuário </summary>
     [HttpPost("register")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
         var token = await _authService.RegisterAsync(dto);
         return Ok(new { token });
     }
 
+    /// <summary> Login de um usuário </summary>
     [HttpPost("login")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var token = await _authService.LoginAsync(dto);
         return Ok(new { token });
     }
 
+    /// <summary> Registro de admins</summary>
+    /// <remarks>Requer permissão de Admin</remarks>
     [HttpPost("register-admin")]
     [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto)
     {
         var token = await _authService.RegisterAsync(dto, isAdmin: true);

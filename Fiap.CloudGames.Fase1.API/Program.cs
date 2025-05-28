@@ -10,9 +10,15 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using System.Text;
 
+Log.Logger = SerilogConfiguration.ConfigureSerilog();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Replace the default logger.
+builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -39,7 +45,6 @@ builder.Services.AddTransient(typeof(ILogService<>), typeof(LogService<>));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IGameService, GameService>();
-
 
 builder.Services.AddAuthorization();
 
@@ -73,6 +78,7 @@ builder.Services.AddSwaggerGen(opt =>
             Array.Empty<string>()
         }
     });
+    opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Fiap.CloudGames.Fase1.API.xml"));
 });
 
 

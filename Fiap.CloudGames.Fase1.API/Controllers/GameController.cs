@@ -9,7 +9,11 @@ using System.Security.Claims;
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 
 [ApiController]
-[Route("games")]
+[Route("games/[action]")]
+[Produces("application/json")]
+[Consumes("application/json")]
+[ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
 public class GameController : CustomControllerBase<GameController>
 {
     private readonly IGameService _gameService;
@@ -21,6 +25,8 @@ public class GameController : CustomControllerBase<GameController>
         _logger = logger;
     }
 
+    /// <summary> Adiciona um jogo ao catálogo </summary>
+    /// <remarks>Requer permissão de Admin</remarks>
     [HttpPost]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateGameDto dto)
@@ -29,6 +35,7 @@ public class GameController : CustomControllerBase<GameController>
         return Ok(game);
     }
 
+    /// <summary> Listagem dos jogos </summary>
     [HttpGet]
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll()
@@ -44,6 +51,24 @@ public class GameController : CustomControllerBase<GameController>
         }
     }
 
+
+    /// <summary> Listar detalhes de um jogo específico </summary>
+    [HttpGet("{gameId}")]
+    [Authorize(Roles = "User,Admin")]
+    public async Task<IActionResult> GetById(Guid gameId)
+    {
+        try
+        {
+            var game = await _gameService.GetByIdAsync(gameId);
+            return HandleResult(game);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex);
+        }
+    }
+
+    /// <summary> Aquisição de um jogo do catálogo </summary>
     [HttpPost("{gameId}/acquire")]
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> Acquire(Guid gameId)
@@ -53,6 +78,7 @@ public class GameController : CustomControllerBase<GameController>
         return NoContent();
     }
 
+    /// <summary> Biblioteca de jogos adquiridos </summary>
     [HttpGet("my-library")]
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetMyGames()
