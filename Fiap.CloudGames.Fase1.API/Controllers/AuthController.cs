@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Fiap.CloudGames.Fase1.Application.Services;
 
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 
@@ -31,7 +32,7 @@ public class AuthController : CustomControllerBase<AuthController>
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
         var token = await _authService.RegisterAsync(dto);
-        return Ok(new { token });
+        return HandleResult(token);
     }
 
     /// <summary> Login de um usuário </summary>
@@ -40,7 +41,7 @@ public class AuthController : CustomControllerBase<AuthController>
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
         var token = await _authService.LoginAsync(dto);
-        return Ok(new { token });
+        return HandleResult(token);
     }
 
     /// <summary> Registro de admins</summary>
@@ -51,6 +52,6 @@ public class AuthController : CustomControllerBase<AuthController>
     public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto)
     {
         var token = await _authService.RegisterAsync(dto, isAdmin: true);
-        return Ok(new { token });
+        return HandleResult(token);
     }
 }

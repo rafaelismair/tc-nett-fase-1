@@ -2,6 +2,7 @@
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Domain.Entities;
 using Fiap.CloudGames.Fase1.Domain.Enums;
+using Fiap.CloudGames.Fase1.Domain.Exceptions;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -30,8 +31,8 @@ public class AuthService : IAuthService
     {
         if (await _context.Users.AnyAsync(u => u.Email == dto.Email))
         {
-            _logger.LogInformation($"E-mail {dto.Email} já cadastrado.");
-            throw new Exception("E-mail já cadastrado.");
+            _logger.LogInformation($"E-mail {dto.Email} already registered.");
+            throw new DomainException("Email already registered.");
         }
 
         var user = new User
@@ -54,8 +55,8 @@ public class AuthService : IAuthService
         var user = await _context.Users.FirstOrDefaultAsync(u => u.Email == dto.Email);
         if (user == null || !BCrypt.Net.BCrypt.Verify(dto.Password, user.PasswordHash))
         {
-            _logger.LogInformation("Usuário ou senha inválidos.");
-            throw new Exception("Usuário ou senha inválidos.");
+            _logger.LogInformation("Invalid username or password.");
+            throw new DomainException("Invalid username or password.");
         }
 
         return GenerateJwt(user);
