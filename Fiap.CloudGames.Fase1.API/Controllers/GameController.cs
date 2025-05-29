@@ -13,7 +13,6 @@ namespace Fiap.CloudGames.Fase1.API.Controllers;
 [Produces("application/json")]
 [Consumes("application/json")]
 [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-
 public class GameController : CustomControllerBase<GameController>
 {
     private readonly IGameService _gameService;
@@ -32,7 +31,7 @@ public class GameController : CustomControllerBase<GameController>
     public async Task<IActionResult> Create([FromBody] CreateGameDto dto)
     {
         var game = await _gameService.CreateAsync(dto);
-        return Ok(game);
+        return HandleResult(game);
     }
 
     /// <summary> Listagem dos jogos </summary>
@@ -40,15 +39,8 @@ public class GameController : CustomControllerBase<GameController>
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll()
     {
-        try
-        {
-            var games = await _gameService.GetAllAsync();
-            return HandleResult(games);
-        }
-        catch (Exception ex)
-        {
-            return HandleException(ex);
-        }
+        var games = await _gameService.GetAllAsync();
+        return HandleResult(games);
     }
 
 
@@ -57,15 +49,8 @@ public class GameController : CustomControllerBase<GameController>
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetById(Guid gameId)
     {
-        try
-        {
-            var game = await _gameService.GetByIdAsync(gameId);
-            return HandleResult(game);
-        }
-        catch (Exception ex)
-        {
-            return HandleException(ex);
-        }
+        var game = await _gameService.GetByIdAsync(gameId);
+        return HandleResult(game);
     }
 
     /// <summary> Aquisição de um jogo do catálogo </summary>
@@ -85,6 +70,6 @@ public class GameController : CustomControllerBase<GameController>
     {
         var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
         var games = await _gameService.GetUserGamesAsync(userId);
-        return Ok(games);
+        return HandleResult(games);
     }
 }

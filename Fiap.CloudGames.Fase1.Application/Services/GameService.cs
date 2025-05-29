@@ -1,6 +1,7 @@
 ﻿using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Domain.Entities;
+using Fiap.CloudGames.Fase1.Domain.Exceptions;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -43,8 +44,8 @@ public class GameService : IGameService
         var exists = await _context.UserGames.AnyAsync(x => x.UserId == userId && x.GameId == gameId);
         if (exists)
         {
-            _logger.LogInformation("Jogo já adquirido.");
-            throw new Exception("Jogo já adquirido.");
+            _logger.LogInformation("Game already purchased.");
+            throw new DomainException("Game already purchased.");
         }
 
         _context.UserGames.Add(new UserGame

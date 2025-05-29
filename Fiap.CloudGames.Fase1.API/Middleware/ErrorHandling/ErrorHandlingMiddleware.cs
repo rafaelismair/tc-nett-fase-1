@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Fiap.CloudGames.Fase1.Domain.Exceptions;
 
 namespace Fiap.CloudGames.Fase1.API.Middleware.ErrorHandling
 {
@@ -18,6 +19,19 @@ namespace Fiap.CloudGames.Fase1.API.Middleware.ErrorHandling
             try
             {
                 await _next(httpContext);
+            }
+            catch (DomainException ex)
+            {
+                _logger.LogError(ex, "A domain error occurred.");
+                httpContext.Response.ContentType = "application/json";
+                httpContext.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                var response = new
+                {
+                    error = "Invalid operation",
+                    details = ex.Message
+                };
+
+                await httpContext.Response.WriteAsJsonAsync(response);
             }
             catch (Exception ex)
             {
