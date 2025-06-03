@@ -30,8 +30,15 @@ public class AuthController : CustomControllerBase<AuthController>
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
-        var token = await _authService.RegisterAsync(dto);
-        return Ok(new { token });
+        try
+        {
+            var token = await _authService.RegisterAsync(dto);
+            return HandleResult(token);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex);
+        }
     }
 
     /// <summary> Login de um usuário </summary>
@@ -39,8 +46,16 @@ public class AuthController : CustomControllerBase<AuthController>
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var token = await _authService.LoginAsync(dto);
-        return Ok(new { token });
+        string? token = string.Empty;
+        try
+        {
+            token = await _authService.LoginAsync(dto);
+            return HandleResult(token);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, ex.Message);
+        }
     }
 
     /// <summary> Registro de admins</summary>

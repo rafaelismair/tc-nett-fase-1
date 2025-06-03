@@ -73,9 +73,16 @@ public class GameController : CustomControllerBase<GameController>
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> Acquire(Guid gameId)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
-        await _gameService.AcquireGameAsync(userId, gameId);
-        return NoContent();
+        try
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
+            await _gameService.AcquireGameAsync(userId, gameId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex, ex.Message);
+        }
     }
 
     /// <summary> Biblioteca de jogos adquiridos </summary>
@@ -83,8 +90,15 @@ public class GameController : CustomControllerBase<GameController>
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetMyGames()
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
-        var games = await _gameService.GetUserGamesAsync(userId);
-        return Ok(games);
+        try
+        {
+            var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
+            var games = await _gameService.GetUserGamesAsync(userId);
+            return Ok(games);
+        }
+        catch (Exception ex)
+        {
+            return HandleException(ex);
+        }
     }
 }
