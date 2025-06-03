@@ -91,3 +91,4 @@ tmp/
 *.pid
 *.tar
 
+/Fiap.CloudGames.Fase1.API/logs
