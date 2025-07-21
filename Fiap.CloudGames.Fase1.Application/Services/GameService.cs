@@ -1,7 +1,8 @@
-﻿using Fiap.CloudGames.Fase1.Application.DTOs;
+﻿using Fiap.CloudGames.Fase1.Application.DTOs.Games;
+using Fiap.CloudGames.Fase1.Application.DTOs.Shared;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
+using Fiap.CloudGames.Fase1.Application.Mapping;
 using Fiap.CloudGames.Fase1.Domain.Entities;
-using Fiap.CloudGames.Fase1.Domain.Exceptions;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -18,57 +19,53 @@ public class GameService : IGameService
         _logger = logger;
     }
 
-    public async Task<Game> CreateAsync(CreateGameDto dto)
+    public async Task<GameDto> CreateAsync(CreateGameDto dto)
     {
-        var game = new Game
-        {
-            Id = Guid.NewGuid(),
-            Title = dto.Title,
-            Description = dto.Description,
-            ReleaseDate = dto.ReleaseDate
-        };
+        var game = new Game(dto.Title, dto.Description, dto.ReleaseDate);
 
         _context.Games.Add(game);
-        await _context.SaveChangesAsync();
+        var result = await _context.SaveChangesAsync();
 
-        return game;
-    }
-
-    public async Task<IEnumerable<Game>> GetAllAsync()
-    {
-        return await _context.Games.ToListAsync();
-    }
-
-    public async Task AcquireGameAsync(Guid userId, Guid gameId)
-    {
-        var exists = await _context.UserGames.AnyAsync(x => x.UserId == userId && x.GameId == gameId);
-        if (exists)
+        if (result is 0)
         {
-            _logger.LogInformation("Game already purchased.");
-            throw new DomainException("Game already purchased.");
+            throw new Exception("Algum erro aconteceu ao cadastrar o jogo.");
         }
 
-        _context.UserGames.Add(new UserGame
+        return GameMapper.ToDto(game);
+    }
+
+    public async Task<ListGamesDto> GetAllAsync(PaginationDto pagination)
+    {
+        var games = await _context.Games
+                    .AsNoTracking()
+                    .Skip((pagination.PageNumber - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .ToListAsync();
+
+        var total = await _context.Games.AsNoTracking().CountAsync();
+        pagination.SetTotalPages(total);
+        return GameMapper.ToListDto(games, pagination);
+    }
+
+    public async Task<GameDto> GetByIdAsync(Guid gameId)
+    {
+        var game = await _context.Games.FirstOrDefaultAsync(game => game.Id == gameId);
+        return GameMapper.ToDto(game);
+    }
+
+    public async Task RemoveGameAsync(Guid gameId)
+    {
+        var game = await _context.Games.FirstOrDefaultAsync(game => game.Id == gameId);
+
+        if (game is null)
+            throw new KeyNotFoundException($"Jogo com ID {gameId} não encontrado para remoção.");
+
+        _context.Games.Remove(game);
+        var result = await _context.SaveChangesAsync();
+
+        if (result is 0)
         {
-            UserId = userId,
-            GameId = gameId,
-            AcquiredAt = DateTime.UtcNow
-        });
-
-        await _context.SaveChangesAsync();
-    }
-
-    public async Task<IEnumerable<Game>> GetUserGamesAsync(Guid userId)
-    {
-        return await _context.UserGames
-            .Where(x => x.UserId == userId)
-            .Include(x => x.Game)
-            .Select(x => x.Game)
-            .ToListAsync();
-    }
-
-    public async Task<Game> GetByIdAsync(Guid gameId)
-    {
-        return await _context.Games.FirstOrDefaultAsync(game => game.Id == gameId);
+            throw new Exception("Algum erro aconteceu ao remover o jogo.");
+        }
     }
 }

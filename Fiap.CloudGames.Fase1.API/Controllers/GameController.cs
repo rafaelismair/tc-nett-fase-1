@@ -1,5 +1,6 @@
 ﻿using Fiap.CloudGames.Fase1.API.Controllers.Base;
-using Fiap.CloudGames.Fase1.Application.DTOs;
+using Fiap.CloudGames.Fase1.Application.DTOs.Games;
+using Fiap.CloudGames.Fase1.Application.DTOs.Shared;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -37,9 +38,9 @@ public class GameController : CustomControllerBase<GameController>
     /// <summary> Listagem dos jogos </summary>
     [HttpGet]
     [Authorize(Roles = "User,Admin")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(PaginationDto pagination)
     {
-        var games = await _gameService.GetAllAsync();
+        var games = await _gameService.GetAllAsync(pagination);
         return HandleResult(games);
     }
 

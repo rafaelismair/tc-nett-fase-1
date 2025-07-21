@@ -1,12 +1,12 @@
 using Fiap.CloudGames.Fase1.API.Controllers.Base;
 using Fiap.CloudGames.Fase1.API.Middleware.Logging;
-using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Fiap.CloudGames.Fase1.Application.Services;
+using Fiap.CloudGames.Fase1.Application.DTOs.Auth;
 
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 

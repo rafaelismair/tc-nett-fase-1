@@ -16,4 +16,8 @@
     <ProjectReference Include="..\Fiap.CloudGames.Fase1.Infrastructure\Fiap.CloudGames.Fase1.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="DTOs\Users\" />
+  </ItemGroup>
+
 </Project>

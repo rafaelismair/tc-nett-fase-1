@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Fiap.CloudGames.Fase1.Application.DTOs;
+namespace Fiap.CloudGames.Fase1.Application.DTOs.Auth;
 public class RegisterUserDto
 {
     [Required]
