@@ -7,7 +7,16 @@ public class Game
     public DateTime ReleaseDate { get; private set; }
     public ICollection<UserGame> UserGames { get; set; } = new List<UserGame>();
 
+    public Game() { }
+
     public Game(string title, string description, DateTime releaseDate)
+    {
+        Title = title;
+        Description = description;
+        ReleaseDate = releaseDate;
+    }
+
+    public void Update(string title, string description, DateTime releaseDate)
     {
         Title = title;
         Description = description;

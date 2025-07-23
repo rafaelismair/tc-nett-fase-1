@@ -5,7 +5,7 @@ using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
+using System.Net;
 
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 
@@ -31,8 +31,14 @@ public class GameController : CustomControllerBase<GameController>
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateGameDto dto)
     {
-        var game = await _gameService.CreateAsync(dto);
-        return HandleResult(game);
+        var result = await _gameService.CreateAsync(dto);
+
+        if (!result.Success)
+        {
+            return HandleError(result.Error.StatusCode, result.Error.ErrorMessage);
+        }
+
+        return HandleResult(result);
     }
 
     /// <summary> Listagem dos jogos </summary>
@@ -40,37 +46,90 @@ public class GameController : CustomControllerBase<GameController>
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll(PaginationDto pagination)
     {
-        var games = await _gameService.GetAllAsync(pagination);
-        return HandleResult(games);
-    }
+        var result = await _gameService.GetAllAsync(pagination);
 
+        if (!result.Success)
+        {
+            return HandleError(result.Error.StatusCode, result.Error.ErrorMessage);
+        }
+
+        return HandleResult(result);
+    }
 
     /// <summary> Listar detalhes de um jogo específico </summary>
     [HttpGet("{gameId}")]
     [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetById(Guid gameId)
     {
-        var game = await _gameService.GetByIdAsync(gameId);
-        return HandleResult(game);
+        var result = await _gameService.GetByIdAsync(gameId);
+
+        if (!result.Success)
+        {
+            return HandleError(result.Error.StatusCode, result.Error.ErrorMessage);
+        }
+
+        return HandleResult(result);
     }
 
-    /// <summary> Aquisição de um jogo do catálogo </summary>
-    [HttpPost("{gameId}/acquire")]
-    [Authorize(Roles = "User,Admin")]
-    public async Task<IActionResult> Acquire(Guid gameId)
+    /// <summary> Remove um jogo específico </summary>
+    [HttpGet("{gameId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> RemoveById(Guid gameId)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
-        await _gameService.AcquireGameAsync(userId, gameId);
-        return NoContent();
+        var result = await _gameService.RemoveGameAsync(gameId);
+
+        if (!result.Success)
+        {
+            return HandleError(result.Error.StatusCode, result.Error.ErrorMessage);
+        }
+
+        return HandleResult(result);
     }
 
-    /// <summary> Biblioteca de jogos adquiridos </summary>
-    [HttpGet("my-library")]
-    [Authorize(Roles = "User,Admin")]
-    public async Task<IActionResult> GetMyGames()
+    /// <summary> Atualiza um jogo específico </summary>
+    [HttpGet("{gameId}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Update(CreateGameDto dto, Guid gameId)
     {
-        var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
-        var games = await _gameService.GetUserGamesAsync(userId);
-        return HandleResult(games);
+        var result = await _gameService.UpdateAsync(dto, gameId);
+
+        if (!result.Success)
+        {
+            return HandleError(result.Error.StatusCode, result.Error.ErrorMessage);
+        }
+
+        return HandleResult(result);
     }
+
+    ///// <summary> Aquisição de um jogo do catálogo </summary>
+    //[HttpPost("{gameId}/acquire")]
+    //[Authorize(Roles = "User,Admin")]
+    //public async Task<IActionResult> Acquire(Guid gameId)
+    //{
+    //    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
+    //    await _gameService.AcquireGameAsync(userId, gameId);
+    //    return NoContent();
+    //}
+
+    ///// <summary> Biblioteca de jogos adquiridos </summary>
+    //[HttpGet("my-library")]
+    //[Authorize(Roles = "User,Admin")]
+    //public async Task<IActionResult> GetMyGames()
+    //{
+    //    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
+    //    var games = await _gameService.(userId);
+    //    return HandleResult(games);
+    //}
+
+    #region Private Methods
+    private IActionResult HandleError(HttpStatusCode statusCode, string errorMessage)
+    {
+        return statusCode switch
+        {
+            HttpStatusCode.BadRequest => HandleBadRequest(errorMessage),
+            HttpStatusCode.InternalServerError => HandleException(errorMessage),
+            _ => StatusCode((int)statusCode, new { error = errorMessage })
+        };
+    }
+    #endregion
 }

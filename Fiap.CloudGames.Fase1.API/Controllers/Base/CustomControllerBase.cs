@@ -40,5 +40,12 @@ namespace Fiap.CloudGames.Fase1.API.Controllers.Base
 
             return StatusCode(StatusCodes.Status500InternalServerError, new { error = message });
         }
+
+        protected virtual IActionResult HandleException(string exceptionMessage, string message = "Ocorreu um erro inesperado.")
+        {
+            _baseLogger.LogError(exceptionMessage);
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new { error = message });
+        }
     }
 }
