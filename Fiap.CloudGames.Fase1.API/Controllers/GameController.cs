@@ -44,7 +44,7 @@ public class GameController : CustomControllerBase<GameController>
     /// <summary> Listagem dos jogos </summary>
     [HttpGet]
     [Authorize(Roles = "User,Admin")]
-    public async Task<IActionResult> GetAll(PaginationDto pagination)
+    public async Task<IActionResult> GetAll([FromQuery] PaginationDto pagination)
     {
         var result = await _gameService.GetAllAsync(pagination);
 
@@ -72,7 +72,7 @@ public class GameController : CustomControllerBase<GameController>
     }
 
     /// <summary> Remove um jogo específico </summary>
-    [HttpGet("{gameId}")]
+    [HttpDelete("{gameId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> RemoveById(Guid gameId)
     {
@@ -87,7 +87,7 @@ public class GameController : CustomControllerBase<GameController>
     }
 
     /// <summary> Atualiza um jogo específico </summary>
-    [HttpGet("{gameId}")]
+    [HttpPut("{gameId}")]
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(CreateGameDto dto, Guid gameId)
     {
@@ -100,26 +100,6 @@ public class GameController : CustomControllerBase<GameController>
 
         return HandleResult(result);
     }
-
-    ///// <summary> Aquisição de um jogo do catálogo </summary>
-    //[HttpPost("{gameId}/acquire")]
-    //[Authorize(Roles = "User,Admin")]
-    //public async Task<IActionResult> Acquire(Guid gameId)
-    //{
-    //    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
-    //    await _gameService.AcquireGameAsync(userId, gameId);
-    //    return NoContent();
-    //}
-
-    ///// <summary> Biblioteca de jogos adquiridos </summary>
-    //[HttpGet("my-library")]
-    //[Authorize(Roles = "User,Admin")]
-    //public async Task<IActionResult> GetMyGames()
-    //{
-    //    var userId = Guid.Parse(User.FindFirstValue(ClaimTypes.Name)!);
-    //    var games = await _gameService.(userId);
-    //    return HandleResult(games);
-    //}
 
     #region Private Methods
     private IActionResult HandleError(HttpStatusCode statusCode, string errorMessage)

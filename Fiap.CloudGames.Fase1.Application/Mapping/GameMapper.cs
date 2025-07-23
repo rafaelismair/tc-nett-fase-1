@@ -6,18 +6,19 @@ namespace Fiap.CloudGames.Fase1.Application.Mapping;
 
 public static class GameMapper
 {
-    public static GameDto ToDto(Game? game)
+    public static GameDto? ToDto(Game? game)
     {
         if (game is null)
         {
-            return new GameDto();
+            return null;
         }
 
         return new GameDto
         {
             Id = game.Id,
             Title = game.Title,
-            Description = game.Description
+            Description = game.Description,
+            ReleaseDate = game.ReleaseDate
         };
     }
 
