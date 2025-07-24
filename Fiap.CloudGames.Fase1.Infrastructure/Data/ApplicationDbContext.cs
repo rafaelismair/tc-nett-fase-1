@@ -12,6 +12,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Game> Games => Set<Game>();
     public DbSet<UserGame> UserGames => Set<UserGame>();
+    public DbSet<Promotion> Promotions => Set<Promotion>();
+    public DbSet<GamePromotion> GamePromotions => Set<GamePromotion>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

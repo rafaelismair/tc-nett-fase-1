@@ -6,7 +6,7 @@ public class Game
     public string Description { get; private set; } = default!;
     public DateTime ReleaseDate { get; private set; }
     public ICollection<UserGame> UserGames { get; set; } = new List<UserGame>();
-
+    public ICollection<GamePromotion> GamePromotions { get; set; } = new List<GamePromotion>();
     public Game() { }
 
     public Game(string title, string description, DateTime releaseDate)
