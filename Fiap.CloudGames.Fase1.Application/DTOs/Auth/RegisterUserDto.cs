@@ -3,13 +3,13 @@
 namespace Fiap.CloudGames.Fase1.Application.DTOs.Auth;
 public class RegisterUserDto
 {
-    [Required]
+    [Required(ErrorMessage = "O campo Nome é de preenchimento obrigatório.")]
     public string Name { get; set; } = default!;
     [Required]
-    [EmailAddress(ErrorMessage = "Please enter a valid email address.")]
+    [EmailAddress(ErrorMessage = "Favor informar um endereço de e-mail válido.")]
     public string Email { get; set; } = default!;
-    [MinLength(8)]
+    [MinLength(8, ErrorMessage = "A senha deve ter pelo menos 8 caracteres.")]
     [RegularExpression(@"^(?=.*[a-zA-Z])(?=.*\d)(?=.*[\W_]).+$",
-        ErrorMessage = "The password must contain at least one letter, one number, and one special character.")]
+        ErrorMessage = "A senha deve conter ao menos uma letra, um número e um caractere especial.")]
     public string Password { get; set; } = string.Empty;
 }
