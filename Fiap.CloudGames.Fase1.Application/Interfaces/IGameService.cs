@@ -1,4 +1,5 @@
 ﻿using Fiap.CloudGames.Fase1.Application.DTOs.Games;
+using Fiap.CloudGames.Fase1.Application.DTOs.Promotions;
 using Fiap.CloudGames.Fase1.Application.DTOs.Shared;
 
 namespace Fiap.CloudGames.Fase1.Application.Interfaces;
@@ -10,4 +11,5 @@ public interface IGameService
     Task<ResultDto<ListGamesDto>> GetAllAsync(PaginationDto pagination);
     Task<ResultDto<GameDto>> GetByIdAsync(Guid gameId);
     Task<ResultDto> RemoveGameAsync(Guid gameId);
+    Task<ResultDto<GamePromotionDto>> AddPromotionToGameAsync(Guid gameId, Guid promotionId, PromotionPeriodDto promotionPeriod);
 }

@@ -1,4 +1,5 @@
 ﻿using Fiap.CloudGames.Fase1.Application.DTOs.Games;
+using Fiap.CloudGames.Fase1.Application.DTOs.Promotions;
 using Fiap.CloudGames.Fase1.Application.DTOs.Shared;
 using Fiap.CloudGames.Fase1.Application.DTOs.Shared.ValueObjects;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
@@ -20,6 +21,27 @@ public class GameService : IGameService
         _logger = logger;
     }
 
+    public async Task<ResultDto<GamePromotionDto>> AddPromotionToGameAsync(Guid gameId, Guid promotionId, PromotionPeriodDto promotionPeriod)
+    {
+        var game = await _context.Games.FirstOrDefaultAsync(game => game.Id == gameId);
+        if (game is null)
+            return ResultDto<GamePromotionDto>.Fail(Error.BadRequest($"Game with ID {gameId} not found."));
+
+        var promotion = await _context.Promotions.FirstOrDefaultAsync(promotion => promotion.Id == promotionId);
+        if (promotion is null)
+            return ResultDto<GamePromotionDto>.Fail(Error.BadRequest($"Promotion with ID {promotionId} not found."));
+
+        var gamePromotion = new GamePromotion(game.Id, promotion.Id, promotionPeriod.StartDate, promotionPeriod.EndDate);
+        
+        _context.GamePromotions.Add(gamePromotion);
+        var result = await _context.SaveChangesAsync();
+
+        if (result is 0)
+            return ResultDto<GamePromotionDto>.Fail(Error.InternalServerError("Failed to add promotion to the game."));
+
+        return ResultDto<GamePromotionDto>.Ok(GameMapper.ToDto(gamePromotion));
+    }
+
     public async Task<ResultDto<GameDto>> CreateAsync(CreateGameDto dto)
     {
         var game = new Game(dto.Title, dto.Description, dto.ReleaseDate);
@@ -29,7 +51,7 @@ public class GameService : IGameService
 
         if (result is 0)
         {
-            return ResultDto<GameDto>.Fail(Error.InternalServerError("Houve uma falha e não foi possível cadastrar o jogo"));
+            return ResultDto<GameDto>.Fail(Error.InternalServerError("Failed to create the game."));
         }
 
         return ResultDto<GameDto>.Ok(GameMapper.ToDto(game));
@@ -59,17 +81,17 @@ public class GameService : IGameService
         var game = await _context.Games.AsNoTracking().FirstOrDefaultAsync(game => game.Id == gameId);
 
         if (game is null)
-            return ResultDto.Fail(Error.BadRequest($"O jogo com ID {gameId} não encontrado para remoção."));
+            return ResultDto.Fail(Error.BadRequest($"Game with ID {gameId} not found."));
 
         _context.Games.Remove(game);
         var result = await _context.SaveChangesAsync();
 
         if (result is 0)
         {
-            return ResultDto.Fail(Error.InternalServerError("Algum erro aconteceu ao remover o jogo."));
+            return ResultDto.Fail(Error.InternalServerError("Failed to remove the game."));
         }
 
-        return ResultDto.Ok("Jogo removido");
+        return ResultDto.Ok("Game successfully removed.");
     }
 
     public async Task<ResultDto<GameDto>> UpdateAsync(CreateGameDto dto, Guid gameId)
@@ -77,7 +99,7 @@ public class GameService : IGameService
         var game = await _context.Games.FirstOrDefaultAsync(game => game.Id == gameId);
 
         if (game is null)
-            return ResultDto<GameDto>.Fail(Error.BadRequest($"O jogo com ID {gameId} não encontrado para atualização."));
+            return ResultDto<GameDto>.Fail(Error.BadRequest($"Game with ID {gameId} not found."));
 
         game.Update(dto.Title, dto.Description, dto.ReleaseDate);
 
@@ -85,7 +107,7 @@ public class GameService : IGameService
 
         if (result is 0)
         {
-            return ResultDto<GameDto>.Fail(Error.InternalServerError("Houve uma falha e não foi possível atualizar o jogo"));
+            return ResultDto<GameDto>.Fail(Error.InternalServerError("Failed to update the game."));
         }
 
         return ResultDto<GameDto>.Ok(GameMapper.ToDto(game));

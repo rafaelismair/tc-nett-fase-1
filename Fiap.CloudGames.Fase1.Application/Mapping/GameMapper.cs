@@ -30,4 +30,14 @@ public static class GameMapper
             Pagination = pagination
         };
     }
+
+    public static GamePromotionDto? ToDto(GamePromotion? gamePromotion)
+    {
+        if (gamePromotion is null)
+        {
+            return null;
+        }
+
+        return new GamePromotionDto(gamePromotion.GamePromotionId, gamePromotion.GameId, gamePromotion.PromotionId, gamePromotion.StartDate, gamePromotion?.EndDate);
+    }
 }

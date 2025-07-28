@@ -45,6 +45,7 @@ builder.Services.AddTransient(typeof(ILogService<>), typeof(LogService<>));
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IPromotionService, PromotionService>();
 
 builder.Services.AddAuthorization();
 

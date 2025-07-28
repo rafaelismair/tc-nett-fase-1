@@ -1,4 +1,5 @@
 ﻿using Fiap.CloudGames.Fase1.Application.DTOs.Games;
+using Fiap.CloudGames.Fase1.Application.DTOs.Promotions;
 using Fiap.CloudGames.Fase1.Application.DTOs.Shared;
 using Fiap.CloudGames.Fase1.Application.Services;
 using Fiap.CloudGames.Fase1.Domain.Entities;
@@ -100,7 +101,7 @@ public class GameServiceTests
     {
         var localContext = new ApplicationDbContext(
         new DbContextOptionsBuilder<ApplicationDbContext>()
-        .UseInMemoryDatabase("NewDb")
+        .UseInMemoryDatabase("NewDbNoGames")
         .Options
         );
 
@@ -113,4 +114,56 @@ public class GameServiceTests
         Assert.Empty(result.Data.Games);
         Assert.Equal(0, pagination.TotalPages);
     }
+
+    [Fact]
+    public async Task AddPromotionToGameAsync_ShouldAddSuccessfully()
+    {
+        var game = new Game("Jogo", "Desc", DateTime.Now);
+        var promotion = new Promotion("Summer Sale", "Desc", 10, true);
+
+        _context.Games.Add(game);
+        _context.Promotions.Add(promotion);
+        await _context.SaveChangesAsync();
+
+        var period = new PromotionPeriodDto(DateTime.UtcNow, DateTime.UtcNow.AddDays(7));
+
+        var result = await _service.AddPromotionToGameAsync(game.Id, promotion.Id, period);
+
+        Assert.True(result.Success);
+        Assert.NotNull(result.Data);
+        Assert.Equal(game.Id, result.Data.GameId);
+        Assert.Equal(promotion.Id, result.Data.PromotionId);
+    }
+
+    [Fact]
+    public async Task AddPromotionToGameAsync_ShouldFail_WhenGameNotFound()
+    {
+        var promotion = new Promotion("Summer Sale", "Desc", 10, true); 
+        
+        _context.Promotions.Add(promotion);
+        await _context.SaveChangesAsync();
+
+        var period = new PromotionPeriodDto(DateTime.UtcNow, DateTime.UtcNow.AddDays(7));
+
+        var result = await _service.AddPromotionToGameAsync(Guid.NewGuid(), promotion.Id, period);
+
+        Assert.False(result.Success);
+        Assert.Null(result.Data);
+    }
+
+    [Fact]
+    public async Task AddPromotionToGameAsync_ShouldFail_WhenPromotionNotFound()
+    {
+        var game = new Game("Jogo", "Desc", DateTime.Now);
+        _context.Games.Add(game);
+        await _context.SaveChangesAsync();
+
+        var period = new PromotionPeriodDto(DateTime.UtcNow, DateTime.UtcNow.AddDays(7));
+
+        var result = await _service.AddPromotionToGameAsync(game.Id, Guid.NewGuid(), period);
+
+        Assert.False(result.Success);
+        Assert.Null(result.Data);
+    }
+
 }

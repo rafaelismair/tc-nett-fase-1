@@ -1,5 +1,4 @@
 ﻿using Fiap.CloudGames.Fase1.API.Controllers.Base;
-using Fiap.CloudGames.Fase1.Application.DTOs.Games;
 using Fiap.CloudGames.Fase1.Application.DTOs.Promotions;
 using Fiap.CloudGames.Fase1.Application.DTOs.Shared;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
@@ -11,28 +10,28 @@ using System.Net;
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 
 [ApiController]
-[Route("game")]
+[Route("promotion")]
 [Produces("application/json")]
 [Consumes("application/json")]
+[Authorize(Roles = "Admin")]
 [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-public class GameController : CustomControllerBase<GameController>
+public class PromotionController : CustomControllerBase<PromotionController>
 {
-    private readonly IGameService _gameService;
-    private readonly ILogService<GameController> _logger;
+    private readonly IPromotionService _promotionService;
+    private readonly ILogService<PromotionController> _logger;
 
-    public GameController(IGameService gameService, ILogService<GameController> logger) : base(logger)
+    public PromotionController(IPromotionService promotionService, ILogService<PromotionController> logger) : base(logger)
     {
-        _gameService = gameService;
+        _promotionService = promotionService;
         _logger = logger;
     }
 
-    /// <summary> Adiciona um jogo ao catálogo </summary>
+    /// <summary> Cria uma nova promoção </summary>
     /// <remarks>Requer permissão de Admin</remarks>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Create([FromBody] CreateGameDto dto)
+    public async Task<IActionResult> Create([FromBody] CreatePromotionDto dto)
     {
-        var result = await _gameService.CreateAsync(dto);
+        var result = await _promotionService.CreateAsync(dto);
 
         if (!result.Success)
         {
@@ -42,12 +41,12 @@ public class GameController : CustomControllerBase<GameController>
         return HandleResult(result);
     }
 
-    /// <summary> Listagem dos jogos </summary>
+    /// <summary> Listagem das promoções </summary>
+    /// <remarks>Requer permissão de Admin</remarks>
     [HttpGet]
-    [Authorize(Roles = "User,Admin")]
     public async Task<IActionResult> GetAll([FromQuery] PaginationDto pagination)
     {
-        var result = await _gameService.GetAllAsync(pagination);
+        var result = await _promotionService.GetAllAsync(pagination);
 
         if (!result.Success)
         {
@@ -57,28 +56,12 @@ public class GameController : CustomControllerBase<GameController>
         return HandleResult(result);
     }
 
-    /// <summary> Listar detalhes de um jogo específico </summary>
-    [HttpGet("{gameId}")]
-    [Authorize(Roles = "User,Admin")]
-    public async Task<IActionResult> GetById(Guid gameId)
-    {
-        var result = await _gameService.GetByIdAsync(gameId);
-
-        if (!result.Success)
-        {
-            return HandleError(result.Error.StatusCode, result.Error.ErrorMessage);
-        }
-
-        return HandleResult(result);
-    }
-
-    /// <summary> Remove um jogo específico </summary>
+    /// <summary> Listar detalhes de uma promoção específica </summary>
     /// <remarks>Requer permissão de Admin</remarks>
-    [HttpDelete("{gameId}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> RemoveById(Guid gameId)
+    [HttpGet("{promotionId}")]
+    public async Task<IActionResult> GetById(Guid promotionId)
     {
-        var result = await _gameService.RemoveGameAsync(gameId);
+        var result = await _promotionService.GetByIdAsync(promotionId);
 
         if (!result.Success)
         {
@@ -88,13 +71,12 @@ public class GameController : CustomControllerBase<GameController>
         return HandleResult(result);
     }
 
-    /// <summary> Atualiza um jogo específico </summary>
+    /// <summary> Remove uma promoção específica </summary>
     /// <remarks>Requer permissão de Admin</remarks>
-    [HttpPut("{gameId}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> Update(CreateGameDto dto, Guid gameId)
+    [HttpDelete("{promotionId}")]
+    public async Task<IActionResult> RemoveById(Guid promotionId)
     {
-        var result = await _gameService.UpdateAsync(dto, gameId);
+        var result = await _promotionService.RemovePromotionAsync(promotionId);
 
         if (!result.Success)
         {
@@ -104,13 +86,12 @@ public class GameController : CustomControllerBase<GameController>
         return HandleResult(result);
     }
 
-    /// <summary> Adiciona uma promoção a um jogo específico </summary>
+    /// <summary> Atualiza uma promoção específica </summary>
     /// <remarks>Requer permissão de Admin</remarks>
-    [HttpPost("{gameId}/{promotionId}")]
-    [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> AddPromotionToGame(Guid gameId, Guid promotionId, [FromBody] PromotionPeriodDto period)
+    [HttpPut("{promotionId}")]
+    public async Task<IActionResult> Update(CreatePromotionDto dto, Guid promotionId)
     {
-        var result = await _gameService.AddPromotionToGameAsync(gameId, promotionId, period);
+        var result = await _promotionService.UpdateAsync(dto, promotionId);
 
         if (!result.Success)
         {
@@ -120,6 +101,20 @@ public class GameController : CustomControllerBase<GameController>
         return HandleResult(result);
     }
 
+    /// <summary> Inativa uma promoção específica </summary>
+    /// <remarks>Requer permissão de Admin</remarks>
+    [HttpPut("{promotionId}/inactive")]
+    public async Task<IActionResult> InactivePromotion(Guid promotionId)
+    {
+        var result = await _promotionService.SetPromotionInactive(promotionId);
+
+        if (!result.Success)
+        {
+            return HandleError(result.Error.StatusCode, result.Error.ErrorMessage);
+        }
+
+        return HandleResult(result);
+    }
 
     #region Private Methods
     private IActionResult HandleError(HttpStatusCode statusCode, string errorMessage)
