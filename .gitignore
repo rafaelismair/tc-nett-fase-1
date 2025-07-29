@@ -80,9 +80,9 @@ Desktop.ini
 # ---------------------------------------------
 # 🐳 Docker e Docker Compose
 # ---------------------------------------------
-docker-compose.override.yml
-docker-compose.*.yml
-Dockerfile*
+
+
+
 .dockerignore
 *.env
 .env.*
