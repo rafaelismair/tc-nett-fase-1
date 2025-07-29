@@ -1,11 +1,12 @@
 using Fiap.CloudGames.Fase1.API.Controllers.Base;
 using Fiap.CloudGames.Fase1.API.Middleware.Logging;
-using Fiap.CloudGames.Fase1.Application.DTOs;
 using Fiap.CloudGames.Fase1.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Fiap.CloudGames.Fase1.Application.Services;
+using Fiap.CloudGames.Fase1.Application.DTOs.Auth;
 
 namespace Fiap.CloudGames.Fase1.API.Controllers;
 
@@ -30,15 +31,8 @@ public class AuthController : CustomControllerBase<AuthController>
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
     {
-        try
-        {
-            var token = await _authService.RegisterAsync(dto);
-            return HandleResult(token);
-        }
-        catch (Exception ex)
-        {
-            return HandleException(ex);
-        }
+        var token = await _authService.RegisterAsync(dto);
+        return HandleResult(token);
     }
 
     /// <summary> Login de um usuário </summary>
@@ -46,16 +40,8 @@ public class AuthController : CustomControllerBase<AuthController>
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        string? token = string.Empty;
-        try
-        {
-            token = await _authService.LoginAsync(dto);
-            return HandleResult(token);
-        }
-        catch (Exception ex)
-        {
-            return HandleException(ex, ex.Message);
-        }
+        var token = await _authService.LoginAsync(dto);
+        return HandleResult(token);
     }
 
     /// <summary> Registro de admins</summary>
@@ -66,6 +52,6 @@ public class AuthController : CustomControllerBase<AuthController>
     public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto)
     {
         var token = await _authService.RegisterAsync(dto, isAdmin: true);
-        return Ok(new { token });
+        return HandleResult(token);
     }
 }

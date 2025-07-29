@@ -1,3 +1,4 @@
+using Fiap.CloudGames.Fase1.API.Extensions;
 using Fiap.CloudGames.Fase1.API.Middleware;
 using Fiap.CloudGames.Fase1.API.Middleware.ErrorHandling;
 using Fiap.CloudGames.Fase1.API.Middleware.Logging;
@@ -84,8 +85,12 @@ builder.Services.AddSwaggerGen(opt =>
 
 var app = builder.Build();
 
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.ApplyMigrations();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();

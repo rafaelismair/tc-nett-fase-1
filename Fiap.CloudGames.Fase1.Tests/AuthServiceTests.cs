@@ -1,4 +1,5 @@
 ﻿using Fiap.CloudGames.Fase1.Application.DTOs;
+using Fiap.CloudGames.Fase1.Application.DTOs.Auth;
 using Fiap.CloudGames.Fase1.Application.Services;
 using Fiap.CloudGames.Fase1.Domain.Entities;
 using Fiap.CloudGames.Fase1.Domain.Enums;

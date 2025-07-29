@@ -1,4 +1,4 @@
-﻿using Fiap.CloudGames.Fase1.Application.DTOs;
+﻿using Fiap.CloudGames.Fase1.Application.DTOs.Auth;
 
 namespace Fiap.CloudGames.Fase1.Application.Interfaces;
 public interface IAuthService

@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandVersion": "1.0",
+      "serviceActions": {
+        "fiap.cloudgames.fase1.api": "StartDebugging"
+      }
+    }
+  }
+}

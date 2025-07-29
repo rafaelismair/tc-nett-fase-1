@@ -1,4 +1,5 @@
-﻿using Fiap.CloudGames.Fase1.Application.DTOs;
+﻿using Fiap.CloudGames.Fase1.Application.DTOs.Games;
+using Fiap.CloudGames.Fase1.Application.DTOs.Shared;
 using Fiap.CloudGames.Fase1.Application.Services;
 using Fiap.CloudGames.Fase1.Domain.Entities;
 using Fiap.CloudGames.Fase1.Infrastructure.Data;
@@ -34,37 +35,82 @@ public class GameServiceTests
             ReleaseDate = DateTime.UtcNow
         };
 
-        var game = await _service.CreateAsync(dto);
+        var result = await _service.CreateAsync(dto);
 
-        Assert.NotNull(game);
-        Assert.Equal(dto.Title, game.Title);
+        Assert.True(result.Success);
+        Assert.Equal(dto.Title, result?.Data?.Title);
     }
 
     [Fact]
-    public async Task AcquireGameAsync_ShouldAddUserGame()
+    public async Task GetAllAsync_ShouldReturnPaginatedGames()
     {
-        var user = new User
+        for (int i = 1; i <= 10; i++)
         {
-            Id = Guid.NewGuid(),
-            Name = "Carlos",
-            Email = "carlos@fiap.com",
-            PasswordHash = "hashed",
-            Role = Domain.Enums.UserRole.User
-        };
-        var game = new Game
-        {
-            Id = Guid.NewGuid(),
-            Title = "Game A",
-            Description = "Descrição",
-            ReleaseDate = DateTime.UtcNow
-        };
+            _context.Games.Add(new Game($"Jogo {i}", $"Descrição {i}", DateTime.UtcNow.AddDays(-i)));
+        }
 
-        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+
+        var pagination = new PaginationDto() { PageNumber = 1, PageSize = 5};
+
+        var result = await _service.GetAllAsync(pagination);
+
+        Assert.True(result.Success);
+        Assert.NotNull(result.Data);
+        Assert.Equal(5, result.Data.Games.Count); 
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_ShouldReturnGame_WhenExists()
+    {
+        var game = new Game("Found Game", "Description", DateTime.Today);
         _context.Games.Add(game);
         await _context.SaveChangesAsync();
 
-        await _service.AcquireGameAsync(user.Id, game.Id);
+        var result = await _service.GetByIdAsync(game.Id);
 
-        Assert.True(_context.UserGames.Any(ug => ug.UserId == user.Id && ug.GameId == game.Id));
+        Assert.True(result.Success);
+        Assert.NotNull(result.Data);
+        Assert.Equal(game.Id, result.Data.Id);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldUpdateGame_WhenExists()
+    {
+        var game = new Game("Old Title", "Old Desc", DateTime.Today);
+        _context.Games.Add(game);
+        await _context.SaveChangesAsync();
+
+        var dto = new CreateGameDto()
+        {
+            Title = "New Title", 
+            Description = "New Desc", 
+            ReleaseDate = DateTime.Today.AddDays(1)
+        };
+
+        var result = await _service.UpdateAsync(dto, game.Id);
+
+        Assert.True(result.Success);
+        Assert.Equal("New Title", result.Data.Title);
+        Assert.Equal("New Desc", result.Data.Description);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnEmptyList_WhenNoGamesExist()
+    {
+        var localContext = new ApplicationDbContext(
+        new DbContextOptionsBuilder<ApplicationDbContext>()
+        .UseInMemoryDatabase("NewDb")
+        .Options
+        );
+
+        var pagination = new PaginationDto();
+
+        var result = await _service.GetAllAsync(pagination);
+
+        Assert.True(result.Success);
+        Assert.NotNull(result.Data);
+        Assert.Empty(result.Data.Games);
+        Assert.Equal(0, pagination.TotalPages);
     }
 }
