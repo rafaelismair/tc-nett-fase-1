@@ -35,3 +35,48 @@ jobs:
           --no-restore \
           --no-build \
           --verbosity normal
+  deploy:
+    name: 🚀 Deploy para Azure Web App
+    runs-on: ubuntu-latest
+    needs: build-and-test
+
+    env:
+      RESOURCE_GROUP: ${{ secrets.RESOURCE_GROUP }}
+      CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }}
+      IMAGE_REPOSITORY: ${{ secrets.IMAGE_REPOSITORY }}
+      DOCKERFILE_PATH: ${{ secrets.DOCKERFILE_PATH }}
+      WEBAPP_NAME: ${{ secrets.WEBAPP_NAME }}
+
+    steps:
+    - name: 📥 Checkout do código
+      uses: actions/checkout@v4
+
+    - name: 🔐 Azure Login
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 🐳 Login no Azure Container Registry (ACR)
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.CONTAINER_REGISTRY }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
+
+    - name: 🏗️ Build e Push da imagem para o ACR
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: ${{ env.DOCKERFILE_PATH }}
+        push: true
+        tags: ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest
+
+    - name: 🚀 Atualizar Web App para nova imagem
+      run: |
+        az webapp config container set \
+          --name ${{ env.WEBAPP_NAME }} \
+          --resource-group ${{ env.RESOURCE_GROUP }} \
+          --docker-custom-image-name ${{ env.CONTAINER_REGISTRY }}/${{ env.IMAGE_REPOSITORY }}:latest \
+          --docker-registry-server-url https://${{ env.CONTAINER_REGISTRY }}
+
+
