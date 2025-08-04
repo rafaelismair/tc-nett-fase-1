@@ -1,3 +1,5 @@
+﻿version: "3.9"
+
 services:
   fiap.cloudgames.fase1.api:
     image: ${DOCKER_REGISTRY-}fiapcloudgamesfase1api
@@ -6,17 +8,53 @@ services:
       context: .
       dockerfile: Fiap.CloudGames.Fase1.API/Dockerfile
     ports:
-      - "4080:4080"
-      - "4081:4081"
+      - "4080:80"     # Swagger será http://localhost:4080/swagger
+      - "4081:4081"   # Se precisar da porta de metrics
+    depends_on:
+      - cloudgames.database
+    networks:
+      - monitor-net
 
   cloudgames.database:
     image: postgres:latest
     container_name: cloudgames.database
     environment:
-      -  POSTGRES_DB=cloudgames
-      -  POSTGRES_USER=postgres
-      -  POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=cloudgames
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
     volumes:
       - ./containers/cloudgames-db:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - "5432:5432"
+    networks:
+      - monitor-net
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    depends_on:
+      - fiap.cloudgames.fase1.api
+    networks:
+      - monitor-net
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - monitor-net
+
+volumes:
+  grafana-storage:
+
+networks:
+  monitor-net:

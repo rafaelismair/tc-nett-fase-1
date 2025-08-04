@@ -1,57 +1,101 @@
-using Fiap.CloudGames.Fase1.API.Controllers.Base;
-using Fiap.CloudGames.Fase1.API.Middleware.Logging;
-using Fiap.CloudGames.Fase1.Application.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
+Ôªøusing Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Fiap.CloudGames.Fase1.Application.Services;
+using Prometheus;
+using Fiap.CloudGames.Fase1.Application.Interfaces;
+using Fiap.CloudGames.Fase1.API.Controllers.Base;
+using Fiap.CloudGames.Fase1.Infrastructure.LogService.Interfaces;
 using Fiap.CloudGames.Fase1.Application.DTOs.Auth;
+using Microsoft.Extensions.Logging;
 
-namespace Fiap.CloudGames.Fase1.API.Controllers;
-
-[ApiController]
-[Route("auth")]
-[Produces("application/json")]
-[Consumes("application/json")]
-[ProducesResponseType(StatusCodes.Status500InternalServerError)]
-public class AuthController : CustomControllerBase<AuthController>
+namespace Fiap.CloudGames.Fase1.API.Controllers
 {
-    private readonly IAuthService _authService;
-    private readonly ILogService<AuthController> _logger;
-
-    public AuthController(IAuthService authService, ILogService<AuthController> logger) : base(logger)
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : CustomControllerBase<AuthController>
     {
-        _authService = authService;
-        _logger = logger;
-    }
+        private readonly IAuthService _authService;
 
-    /// <summary> Registro de um usu·rio </summary>
-    [HttpPost("register")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
-    {
-        var token = await _authService.RegisterAsync(dto);
-        return HandleResult(token);
-    }
+        // Prometheus metrics with labels for enhanced observability
+        private static readonly Counter AuthCounter = Metrics
+            .CreateCounter("cloudgames_auth_requests_total", "Total number of auth requests", new[] { "action", "status" });
 
-    /// <summary> Login de um usu·rio </summary>
-    [HttpPost("login")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
-    {
-        var token = await _authService.LoginAsync(dto);
-        return HandleResult(token);
-    }
+        private static readonly Histogram AuthProcessingHistogram = Metrics
+            .CreateHistogram("cloudgames_auth_processing_duration_seconds", "Duration of auth operations in seconds", new[] { "action" });
 
-    /// <summary> Registro de admins</summary>
-    /// <remarks>Requer permiss„o de Admin</remarks>
-    [HttpPost("register-admin")]
-    [Authorize(Roles = "Admin")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
-    public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto)
-    {
-        var token = await _authService.RegisterAsync(dto, isAdmin: true);
-        return HandleResult(token);
+        public AuthController(IAuthService authService, ILogService<AuthController> logger)
+            : base(logger)
+        {
+            _authService = authService;
+        }
+
+        /// <summary>
+        /// Endpoint to register a new user.
+        /// </summary>
+        [HttpPost("register")]
+        public async Task<IActionResult> Register([FromBody] RegisterUserDto dto)
+        {
+            var action = "register";
+            using (AuthProcessingHistogram.WithLabels(action).NewTimer())
+            {
+                try
+                {
+                    var token = await _authService.RegisterAsync(dto);
+                    AuthCounter.WithLabels(action, "success").Inc();
+                    return HandleResult(token);
+                }
+                catch (Exception ex)
+                {
+                    AuthCounter.WithLabels(action, "error").Inc();
+                    return HandleException(ex, "Erro ao registrar usu√°rio.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Endpoint to login a user.
+        /// </summary>
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginDto dto)
+        {
+            var action = "login";
+            using (AuthProcessingHistogram.WithLabels(action).NewTimer())
+            {
+                try
+                {
+                    var token = await _authService.LoginAsync(dto);
+                    AuthCounter.WithLabels(action, "success").Inc();
+                    return HandleResult(token);
+                }
+                catch (Exception ex)
+                {
+                    AuthCounter.WithLabels(action, "error").Inc();
+                    return HandleException(ex, "Erro ao efetuar login.");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Endpoint to register an admin user. Requires admin role.
+        /// </summary>
+        [HttpPost("register-admin")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RegisterAdmin([FromBody] RegisterUserDto dto)
+        {
+            var action = "register_admin";
+            using (AuthProcessingHistogram.WithLabels(action).NewTimer())
+            {
+                try
+                {
+                    var token = await _authService.RegisterAsync(dto, isAdmin: true);
+                    AuthCounter.WithLabels(action, "success").Inc();
+                    return HandleResult(token);
+                }
+                catch (Exception ex)
+                {
+                    AuthCounter.WithLabels(action, "error").Inc();
+                    return HandleException(ex, "Erro ao registrar administrador.");
+                }
+            }
+        }
     }
 }
