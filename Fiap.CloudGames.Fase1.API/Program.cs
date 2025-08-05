@@ -12,18 +12,25 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using Prometheus;
 using System.Text;
 
 Log.Logger = SerilogConfiguration.ConfigureSerilog();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Replace the default logger.
-builder.Host.UseSerilog();
+// 🔹 Adiciona coleta de métricas e health checks
+builder.Services.AddHealthChecks();
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
 
+builder.Host.UseSerilog(); // Usa Serilog como logger principal
+
+// 🔹 Banco de dados
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// 🔹 JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -41,16 +48,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddCorrelationIdGenerator();
-builder.Services.AddTransient(typeof(ILogService<>), typeof(LogService<>));
-
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IGameService, GameService>();
-
 builder.Services.AddAuthorization();
 
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
+// 🔹 Injeções personalizadas
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddTransient(typeof(ILogService<>), typeof(LogService<>));
+builder.Services.AddCorrelationIdGenerator();
+
+// 🔹 Swagger + JWT
 builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "FIAP Cloud Games", Version = "v1" });
@@ -79,24 +85,34 @@ builder.Services.AddSwaggerGen(opt =>
             Array.Empty<string>()
         }
     });
+
     opt.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "Fiap.CloudGames.Fase1.API.xml"));
 });
 
-
 var app = builder.Build();
 
+// 🔹 Swagger
 app.UseSwagger();
 app.UseSwaggerUI();
+
+// 🔹 Migrações do banco
 app.ApplyMigrations();
 
+// 🔹 Middlewares padrão
 app.UseAuthentication();
+app.UseRouting();
 app.UseAuthorization();
 
-app.MapControllers();
+// 🔹 Prometheus
+app.UseHttpMetrics();     // 🔁 ❌ Removida duplicação
+app.UseEndpoints(endpoints =>
+{
+    endpoints.MapControllers();
+    endpoints.MapMetrics(); // <-- expõe /metrics
+});
 
-#region Middlewares
+// 🔹 Middlewares personalizados
 app.UseCorrelationIdMiddleware();
 app.UseErrorHandlingMiddleware();
-#endregion
 
 app.Run();
