@@ -1,98 +1,51 @@
-﻿version: '3.9'
+﻿version: "3.9"
 
-###############################################################################
-# REDES E VOLUMES
-###############################################################################
-networks:
-  monitor-net:
-
-volumes:
-  grafana-storage:          # dados persistentes do Grafana
-  cloudgames-db:            # dados do Postgres
-
-###############################################################################
-# SERVIÇOS
-###############################################################################
 services:
-
-  ###########################################################################
-  # Banco de dados Postgres
-  ###########################################################################
-  cloudgames.database:
-    image: postgres:16        # versão fixa ⇒ builds reproduzíveis
-    container_name: cloudgames.database
-    environment:
-      POSTGRES_DB: cloudgames
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    volumes:
-      - cloudgames-db:/var/lib/postgresql/data
-    healthcheck:              # garante que a API só suba quando o DB estiver ok
-      test: ['CMD-SHELL', 'pg_isready -U postgres']
-      interval: 10s
-      retries: 5
-    networks: [monitor-net]
+  api:
+    image: rismair/fiap-apptechchallenge:latest
+    restart: unless-stopped
     ports:
-      - '5432:5432'           # expõe para host (opcional em dev)
-
-  ###########################################################################
-  # API .NET 8 + métricas (HTTP em /metrics)
-  ###########################################################################
-  fiap.cloudgames.fase1.api:
-    build:
-      context: .
-      dockerfile: Fiap.CloudGames.Fase1.API/Dockerfile
-    image: fiapcloudgamesfase1api:latest
-    container_name: fiapcloudgamesfase1api
-    depends_on:
-      cloudgames.database:
-        condition: service_healthy
+      - "80:80"                # porta pública
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      # API e métricas respondem na porta 80 dentro do container
-      ASPNETCORE_URLS: 'http://+:80'
-      ConnectionStrings__Default: |
-        Host=cloudgames.database;
-        Port=5432;
-        Database=cloudgames;
-        Username=postgres;
-        Password=postgres
-    ports:
-      - '4080:80'             # http://localhost:4080/swagger  e  /metrics
-    networks: [monitor-net]
-
-  ###########################################################################
-  # Prometheus (coletor)
-  ###########################################################################
-  prometheus:
-    image: prom/prometheus:v2.52.0
-    container_name: prometheus
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
-    ports:
-      - '9090:9090'           # http://localhost:9090
+      ASPNETCORE_URLS: http://+:80
+      # string vem de variável do Railway (sem hard-code)
+      ConnectionStrings__Default: ${ConnectionStrings__Default}
     depends_on:
-      - fiap.cloudgames.fase1.api
-    networks: [monitor-net]
+      - db
 
-  ###########################################################################
-  # Grafana (visualização)
-  ###########################################################################
-  grafana:
-    image: grafana/grafana:10.4.0
-    container_name: grafana
+  db:
+    image: postgres:16
+    restart: unless-stopped
     ports:
-      - '3000:3000'           # http://localhost:3000  (admin/admin)
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${PGDATABASE}
+      POSTGRES_USER: ${PGUSER}
+      POSTGRES_PASSWORD: ${PGPASSWORD}
+
+  prometheus:
+    image: prom/prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
     volumes:
-      - grafana-storage:/var/lib/grafana
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    depends_on:
+      - api
+
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
     environment:
       GF_SECURITY_ADMIN_USER: admin
       GF_SECURITY_ADMIN_PASSWORD: admin
-      GF_INSTALL_PLUGINS: grafana-piechart-panel
+    volumes:
+      - grafana:/var/lib/grafana
     depends_on:
       - prometheus
-    networks: [monitor-net]
 
-###############################################################################
-# FIM
-###############################################################################
+volumes:
+  grafana:
