@@ -92,3 +92,4 @@ tmp/
 *.tar
 
 /Fiap.CloudGames.Fase1.API/logs
+/containers/cloudgames-db
