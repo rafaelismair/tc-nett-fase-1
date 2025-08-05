@@ -2,11 +2,7 @@ global:
   scrape_interval: 5s
 
 scrape_configs:
-  - job_name: 'prometheus'
-    static_configs:
-      - targets: ['localhost:9090']
-
-  - job_name: 'fcg-api'
+  - job_name: 'api'
     metrics_path: /metrics
     static_configs:
-      - targets: ['fiapcloudgamesfase1api:80']   # porta interna correta (HTTP)
+      - targets: ['api:80']
