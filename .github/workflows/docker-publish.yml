@@ -2,28 +2,35 @@ name: Docker Publish - fiap-apptechchallenge
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  docker:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      - name: 📥 Checkout do código
-        uses: actions/checkout@v4
+    # 1. Checkout
+    - name: 📥 Checkout código
+      uses: actions/checkout@v4
 
-      - name: 🔐 Login no Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+    # 2. (Opcional) Listar arquivos para debug
+    - name: 📂 Listar arquivos
+      run: ls -R
 
-      - name: 🛠️ Build da imagem Docker
-        run: |
-          docker build -t rismair/fiap-apptechchallenge:latest \
-            -f Fiap.CloudGames.Fase1.API/Dockerfile .
+    # 3. Login no Docker Hub
+    - name: 🔐 Login no Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: 🚀 Push para o Docker Hub
-        run: |
-          docker push rismair/fiap-apptechchallenge:latest
+    # 4. Build
+    - name: 🛠️ Build da imagem
+      run: |
+        docker build \
+          -t rismair/fiap-apptechchallenge:latest \
+          -f Fiap.CloudGames.Fase1.API/Dockerfile .   # ← ajuste se o Dockerfile estiver em outro lugar
+
+    # 5. Push
+    - name: 🚀 Push da imagem
+      run: docker push rismair/fiap-apptechchallenge:latest
