@@ -1,60 +1,98 @@
-﻿version: "3.9"
+﻿version: '3.9'
 
+###############################################################################
+# REDES E VOLUMES
+###############################################################################
+networks:
+  monitor-net:
+
+volumes:
+  grafana-storage:          # dados persistentes do Grafana
+  cloudgames-db:            # dados do Postgres
+
+###############################################################################
+# SERVIÇOS
+###############################################################################
 services:
+
+  ###########################################################################
+  # Banco de dados Postgres
+  ###########################################################################
+  cloudgames.database:
+    image: postgres:16        # versão fixa ⇒ builds reproduzíveis
+    container_name: cloudgames.database
+    environment:
+      POSTGRES_DB: cloudgames
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - cloudgames-db:/var/lib/postgresql/data
+    healthcheck:              # garante que a API só suba quando o DB estiver ok
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      retries: 5
+    networks: [monitor-net]
+    ports:
+      - '5432:5432'           # expõe para host (opcional em dev)
+
+  ###########################################################################
+  # API .NET 8 + métricas (HTTP em /metrics)
+  ###########################################################################
   fiap.cloudgames.fase1.api:
-    image: ${DOCKER_REGISTRY-}fiapcloudgamesfase1api
-    container_name: fiapcloudgamesfase1api
     build:
       context: .
       dockerfile: Fiap.CloudGames.Fase1.API/Dockerfile
-    ports:
-      - "4080:80"     # Swagger será http://localhost:4080/swagger
-      - "4081:4081"   # Se precisar da porta de metrics
+    image: fiapcloudgamesfase1api:latest
+    container_name: fiapcloudgamesfase1api
     depends_on:
-      - cloudgames.database
-    networks:
-      - monitor-net
-
-  cloudgames.database:
-    image: postgres:latest
-    container_name: cloudgames.database
+      cloudgames.database:
+        condition: service_healthy
     environment:
-      - POSTGRES_DB=cloudgames
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    volumes:
-      - ./containers/cloudgames-db:/var/lib/postgresql/data
+      ASPNETCORE_ENVIRONMENT: Production
+      # API e métricas respondem na porta 80 dentro do container
+      ASPNETCORE_URLS: 'http://+:80'
+      ConnectionStrings__Default: |
+        Host=cloudgames.database;
+        Port=5432;
+        Database=cloudgames;
+        Username=postgres;
+        Password=postgres
     ports:
-      - "5432:5432"
-    networks:
-      - monitor-net
+      - '4080:80'             # http://localhost:4080/swagger  e  /metrics
+    networks: [monitor-net]
 
+  ###########################################################################
+  # Prometheus (coletor)
+  ###########################################################################
   prometheus:
-    image: prom/prometheus
+    image: prom/prometheus:v2.52.0
     container_name: prometheus
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
-      - "9090:9090"
+      - '9090:9090'           # http://localhost:9090
     depends_on:
       - fiap.cloudgames.fase1.api
-    networks:
-      - monitor-net
+    networks: [monitor-net]
 
+  ###########################################################################
+  # Grafana (visualização)
+  ###########################################################################
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana:10.4.0
     container_name: grafana
     ports:
-      - "3000:3000"
+      - '3000:3000'           # http://localhost:3000  (admin/admin)
     volumes:
       - grafana-storage:/var/lib/grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-piechart-panel
     depends_on:
       - prometheus
-    networks:
-      - monitor-net
+    networks: [monitor-net]
 
-volumes:
-  grafana-storage:
-
-networks:
-  monitor-net:
+###############################################################################
+# FIM
+###############################################################################

@@ -100,8 +100,8 @@ app.ApplyMigrations();
 
 // 🔹 Middlewares padrão
 app.UseAuthentication();
-app.UseAuthorization();
 app.UseRouting();
+app.UseAuthorization();
 
 // 🔹 Prometheus
 app.UseHttpMetrics();     // 🔁 ❌ Removida duplicação
