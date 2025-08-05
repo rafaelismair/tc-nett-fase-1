@@ -1,0 +1,90 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": null,
+    "title": "ASP.NET Core API Metrics",
+    "tags": [
+      "aspnetcore",
+      "prometheus"
+    ],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 1,
+    "refresh": "5s",
+    "panels": [
+      {
+        "type": "graph",
+        "title": "Requisi\u00e7\u00f5es HTTP por segundo",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(http_requests_received_total[1m])",
+            "legendFormat": "Requisi\u00e7\u00f5es",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "type": "graph",
+        "title": "Dura\u00e7\u00e3o das requisi\u00e7\u00f5es HTTP (p95)",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le))",
+            "legendFormat": "p95",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 0,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "type": "graph",
+        "title": "Uso de CPU",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "rate(process_cpu_seconds_total[1m])",
+            "legendFormat": "CPU",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "x": 0,
+          "y": 9,
+          "w": 12,
+          "h": 8
+        }
+      },
+      {
+        "type": "graph",
+        "title": "Uso de Mem\u00f3ria",
+        "datasource": "Prometheus",
+        "targets": [
+          {
+            "expr": "process_working_set_bytes",
+            "legendFormat": "RAM",
+            "refId": "A"
+          }
+        ],
+        "gridPos": {
+          "x": 12,
+          "y": 9,
+          "w": 12,
+          "h": 8
+        }
+      }
+    ]
+  },
+  "overwrite": true
+}
