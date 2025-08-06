@@ -32,21 +32,11 @@ Na Fase 1 construímos uma **API REST** em .NET 8 para gerenciamento de usuário
 ---
 
 ## 🏗️ Arquitetura
-┌───────────────────────────────┐
-│ Presentation │ API (.NET 8) · Controllers · Middlewares
-└───────────▲─────────▲─────────┘
-│ 			    │		      │
-┌───────────┴─────────┴─────────┐
-│ Application │ Services · DTOs · CQRS
-└───────────▲─────────▲─────────┘
-│ 			    │		      │	
-┌───────────┴─────────┴─────────┐
-│ Domain │ Entidades · VOs · Regras de negócio
-└───────────▲─────────▲─────────┘
-│ 			    │		      │ 	
-┌───────────┴─────────┴─────────┐
-│ Infrastructure │ EF Core · Repositórios · Migrations
-└───────────────────────────────┘
+
+Presentation │ API (.NET 8) · Controllers · Middlewares
+Application │ Services · DTOs
+Domain │ Entidades · VOs · Regras de negócio
+Infrastructure │ EF Core · Repositórios · Migrations
 
 * **Clean Architecture** separa camadas de domínio/infra/API.  
 * **DDD** aplica agregados e invariantes.  
