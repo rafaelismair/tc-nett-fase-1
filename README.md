@@ -35,15 +35,15 @@ Na Fase 1 construímos uma **API REST** em .NET 8 para gerenciamento de usuário
 ┌───────────────────────────────┐
 │ Presentation │ API (.NET 8) · Controllers · Middlewares
 └───────────▲─────────▲─────────┘
-│ │
+│ 			│		  │
 ┌───────────┴─────────┴─────────┐
 │ Application │ Services · DTOs · CQRS
 └───────────▲─────────▲─────────┘
-│ │
+│ 			│		  │	
 ┌───────────┴─────────┴─────────┐
 │ Domain │ Entidades · VOs · Regras de negócio
 └───────────▲─────────▲─────────┘
-│ │
+│ 			│		  │ 	
 ┌───────────┴─────────┴─────────┐
 │ Infrastructure │ EF Core · Repositórios · Migrations
 └───────────────────────────────┘
